@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"errors"
 	"fmt"
 	"math/rand/v2"
 	"time"
@@ -9,6 +8,7 @@ import (
 	authcode "github.com/AnthonyViniciusMuller/OAuth/internal/domain/repository/auth_code"
 	"github.com/AnthonyViniciusMuller/OAuth/internal/domain/repository/user"
 	"github.com/dgrijalva/jwt-go"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type Service struct {
@@ -30,8 +30,8 @@ func (service Service) Authorize(username, password string) (string, error) {
 		return "", err
 	}
 
-	if user.Password != password {
-		return "", errors.New("password mismatch")
+	if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
+		return "", fmt.Errorf("%w for user %s", ErrPasswordMismatch, username)
 	}
 
 	// TODO: implement real code generation.
