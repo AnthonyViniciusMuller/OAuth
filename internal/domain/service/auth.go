@@ -46,9 +46,12 @@ func (service Service) Authorize(username, password string) (string, error) {
 }
 
 func (service Service) Token(authCode string) (string, error) {
-	// TODO: remove auth code after used
 	userID, err := service.authcodeRepository.GetUserID(authCode)
 	if err != nil {
+		return "", err
+	}
+
+	if err := service.authcodeRepository.Remove(authCode); err != nil {
 		return "", err
 	}
 
